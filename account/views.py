@@ -1,34 +1,34 @@
+from rest_framework import generics
 from rest_framework.views            import APIView
 from rest_framework.response         import Response
+from rest_framework.permissions      import AllowAny
 from rest_framework.authtoken.models import Token
 
 from django.contrib.auth             import authenticate
-from django.contrib.auth.models      import User
 
-from account.models                  import Account
+from account.models                  import User
+from account.serializers             import RegisterSerializer
 
 
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+    
+    
 class SignupView(APIView):
     def post(self, request):
         user = User.objects.create_user(
                 username=request.data['username'], 
                 password=request.data['password'],
-                email=request.data['email']
             )
-        account = Account(
-                    user=user, 
-                    birth_date=request.data['birth_date'],
-                    phone_number=request.data['phone_number']
-                )
-
         user.save()
-        account.save()
 
         token = Token.objects.create(user=user)
         return Response({"Token": token.key})
     
 
-class LoginView(APIView):
+class SigninView(APIView):
     def post(self, request):
         user = authenticate(
                     username=request.data['username'], 
