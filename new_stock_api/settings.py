@@ -10,12 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from pathlib     import Path
-from datetime    import timedelta
+from pathlib import Path
+from datetime import timedelta
 
 from my_settings import (
     SECRET,
-    DATABASES
+    DATABASES,
+    ALGORITHM
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -160,6 +161,9 @@ CORS_ALLOW_HEADERS = (
 
 # DRF Settings
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]

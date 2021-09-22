@@ -1,42 +1,43 @@
+from django.contrib.auth import authenticate
+
 from rest_framework import generics
-from rest_framework.views            import APIView
-from rest_framework.response         import Response
-from rest_framework.permissions      import AllowAny
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-
-from django.contrib.auth             import authenticate
-
-from account.models                  import User
-from account.serializers             import RegisterSerializer
+from rest_framework.decorators import permission_classes
+from account.models import User
+from account.serializers import (
+    RegisterSerializer,
+    UserSerializer
+)
 
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
-    
-    
-class SignupView(APIView):
-    def post(self, request):
-        user = User.objects.create_user(
-                username=request.data['username'], 
-                password=request.data['password'],
-            )
-        user.save()
 
-        token = Token.objects.create(user=user)
-        return Response({"Token": token.key})
-    
 
-class SigninView(APIView):
-    def post(self, request):
-        user = authenticate(
-                    username=request.data['username'], 
-                    password=request.data['password']
-                )
-        
-        if user is not None:
-            token = Token.objects.get(user=user)
-            return Response({"Token": token.key})
-        else:
-            return Response(status=401)
+class ChangeUserInfoView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+
+    # @permission_classes([IsAuthenticated])
+    # def get(self, request, foramt=None):
+
+    #     print(request.user)
+    #     print(request.user.id)
+    #     users = User.objects.all()
+
+    #     serializer = UserSerializer(users, many=True)
+    #     return Response(serializer.data)
+
+    # def put(self, request, format=None):
+    #     snippet = self.get_object(pk)
+    #     serializer = SnippetSerializer(snippet, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
